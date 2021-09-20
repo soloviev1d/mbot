@@ -63,8 +63,7 @@ async def play(ctx, url:str):
         os.rename(file, "song.mp3")
 
     source = FFmpegPCMAudio('song.mp3')
-    while(True):
-      player = voice.play(source)
+    player = voice.play(source)
   else:
     await ctx.send('You are not in a vc!')
 
