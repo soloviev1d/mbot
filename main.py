@@ -1,42 +1,22 @@
-
-
 #подгружать pip install -U discord.py[voice] в ядро
 #pip install youtube-dl
 #pip install -U ffmpeg
 import os
 import discord
 from discord.ext import commands
-from discord.ext.commands import Bot
 from discord import FFmpegPCMAudio
 import youtube_dl
 import json
 import urllib.parse, urllib.request, re
+import keep_alive
 
 my_secret = os.environ['token']
-
-
-
 client = commands.Bot(command_prefix = '-')
 
 @client.event
 async def on_ready():
   print('Logged in as {0.user}'.format(client))
   print('~~~~~~~~~~~~~~~~~~')
-
-@client.command()
-async def hello(ctx):
-  await ctx.send('Hello World!')
-
-''' @client.command(pass_context = True)
-async def join(ctx):
-  if(ctx.author.voice):
-    channel = ctx.message.author.voice.channel
-    voice = await channel.connect()
-    source = FFmpegPCMAudio('bab.mp3')
-    while(True):
-      player = voice.play(source)
-  else:
-    await ctx.send('You are not in a vc!') '''
 
 @client.command(pass_context = True)
 async def leave(ctx):
@@ -70,11 +50,12 @@ async def play(ctx, *,search):
     for file in os.listdir("./"):
       if file.endswith(".mp3"):
         os.rename(file, "song.mp3")
-
     source = FFmpegPCMAudio('song.mp3')
     player = voice.play(source)
   else:
     await ctx.send('You are not in a vc!')
 
+
+
+keep_alive.keep_alive()
 client.run(my_secret)
-#r'/watch\?v=(.{11})'
