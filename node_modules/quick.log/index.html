@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+        crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
+        crossorigin="anonymous"></script>
+    <title>Quick.log</title>
+    <style>
+        div.footer {
+            position: fixed;
+            margin-top: -53px;
+            top: 100%;
+            left: 100%;
+            margin-left: -121px;
+            z-index: 11000;
+        }
+
+        div.footer img {
+            width: 115px;
+            height: auto;
+        }
+
+        #messages {
+            height: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="scrollbar" id="style-1">
+        <div class="force-overflow"></div>
+    </div>
+
+    <nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse fixed-top">
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand" href="#">Quick.log</a>
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Logs
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <button id="clear" class="btn-primary btn">Clear Log</button>
+            </ul>
+    </nav>
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <!-- Reformatting Here -->
+
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <div class="col offset-0 py-2">
+                <h5 class="hidden-xs-down">
+                    <font color="#2A2B2D">Logs</font>
+                </h5>
+                <br>
+                <div id="messages" class="card-block justify-content-left">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <a href="https://www.discord.io/Plexidev">
+            <img src="https://discordapp.com/api/guilds/343572980351107077/embed.png" alt="Discord Server">
+        </a>
+        <a href="http://www.youtube.com/subscription_center?add_user=TrueXPixels">
+            <img src="https://img.shields.io/badge/Subscribe-YouTube-red.svg" alt="YouTube Channel">
+        </a>
+    </div>
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+
+    <script>
+        // Check Stability
+        $(document).ready(function () {
+            if (!$.browser || !$.browser.webkit) {
+                $('.wrapper').html('<p>Sorry! Non webkit users. :(</p>');
+            }
+        });
+
+        // Run
+        (function () {
+            var element = function (id) {
+                return document.getElementById(id);
+            }
+
+            // Fetch Elements
+            var messages = element('messages');
+            var clearBtn = element('clear');
+
+            // Connect To Socket
+            var socket = io.connect('http://127.0.0.1:8080');
+
+            // Verify Connection
+            if (socket !== undefined) {
+                console.log('Connected to socket...'); // Log Connection
+
+                // Handle Output
+                socket.on('output', function (data) {
+
+                    // Verify Data
+                    if (data.length) {
+                        // Deploy Message
+                        var message = $(data)
+                        console.log(message)
+                        messages.insertBefore(message.get(0), messages.firstChild);
+                    }
+                });
+
+                // Handle Clear
+                clearBtn.addEventListener('click', function () {
+                    messages.textContent = '';
+                });
+
+            }
+        })();
+    </script>
+</body>
+
+</html>

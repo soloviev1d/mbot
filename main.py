@@ -1,3 +1,5 @@
+
+
 #подгружать pip install -U discord.py[voice] в ядро
 #pip install youtube-dl
 #pip install -U ffmpeg
@@ -8,6 +10,7 @@ from discord.ext.commands import Bot
 from discord import FFmpegPCMAudio
 import youtube_dl
 import json
+import urllib.parse, urllib.request, re
 
 my_secret = os.environ['token']
 
@@ -44,11 +47,17 @@ async def leave(ctx):
     await ctx.send('I am not in a vc!')
 
 @client.command(pass_context = True)
-async def play(ctx, url:str):
+async def play(ctx, *,search):
   if(ctx.author.voice):
     channel = ctx.message.author.voice.channel
     voice = await channel.connect()
-
+    query_string = urllib.parse.urlencode({
+      'search_query': search
+    })
+    htm_content = urllib.request.urlopen(
+      'https://www.youtube.com/results?' + query_string
+    )
+    search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode()) #1000-7?
     ydl_opts = {
       'format': 'bestaudio/best', 'postprocessors':[{
         'key': 'FFmpegExtractAudio',
@@ -57,7 +66,7 @@ async def play(ctx, url:str):
       }],
     }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-      ydl.download([url])
+      ydl.download(['https://www.youtube.com/watch?v=' + search_results[0]])
     for file in os.listdir("./"):
       if file.endswith(".mp3"):
         os.rename(file, "song.mp3")
@@ -68,3 +77,4 @@ async def play(ctx, url:str):
     await ctx.send('You are not in a vc!')
 
 client.run(my_secret)
+#r'/watch\?v=(.{11})'
