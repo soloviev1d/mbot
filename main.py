@@ -27,6 +27,10 @@ async def leave(ctx):
     await ctx.send('I am not in a vc!')
 
 @client.command(pass_context = True)
+async def amogus(ctx):
+  await ctx.send(file=discord.File('gus.gif'))
+
+@client.command(pass_context = True)
 async def play(ctx, *,search):
   if(ctx.author.voice):
     channel = ctx.message.author.voice.channel
