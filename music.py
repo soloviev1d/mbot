@@ -1,7 +1,9 @@
 import discord
 from discord.ext import commands
 import youtube_dl
+
 import urllib.parse, urllib.request, re
+from asyncio import sleep
 
 class music(commands.Cog):
   def __init__(self, client):
@@ -22,6 +24,9 @@ class music(commands.Cog):
           url2 = info['formats'][0]['url']
           source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
           vc.play(source)
+          while vc.is_playing():
+            await sleep(600)
+          await vc.disconnect()
     else:
       ctx.voice_client.stop()
       FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
@@ -32,6 +37,9 @@ class music(commands.Cog):
           url2 = info['formats'][0]['url']
           source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
           vc.play(source)
+          while vc.is_playing():
+            await sleep(600)
+          await vc.disconnect()
   @commands.command()
   async def leave(self, ctx):
     await ctx.voice_client.disconnect()
@@ -70,6 +78,9 @@ class music(commands.Cog):
           url2 = info['formats'][0]['url']
           source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
           vc.play(source)
+          while vc.is_playing():
+            await sleep(600)
+          await vc.disconnect()
     else:
       ctx.voice_client.stop()
       query_string = urllib.parse.urlencode({
@@ -88,6 +99,9 @@ class music(commands.Cog):
           url2 = info['formats'][0]['url']
           source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
           vc.play(source)
+          while vc.is_playing():
+            await sleep(600)
+          await vc.disconnect()
 
 def setup(client):
   client.add_cog(music(client))
