@@ -4,12 +4,13 @@
 import os
 import discord
 from discord.ext import commands
-import keep_alive
 import music
 
+
+
 cogs = [music]
-my_secret = os.environ['token']
-client = commands.Bot(command_prefix = '-')
+#my_secret = os.environ['token']
+client = commands.Bot(command_prefix = '!')
 
 for i in range(len(cogs)):
   cogs[i].setup(client)
@@ -23,5 +24,5 @@ async def on_ready():
 async def amogus(ctx):
   await ctx.send(file=discord.File('gus.gif'))
 
-keep_alive.keep_alive()
-client.run(my_secret)
+#keep_alive.keep_alive()
+client.run('ODkzNzY2ODkxNTE1MDIzMzYw.YVgPSA.jc99AlJGpx6N4MuR-MfqXfr76Ew')
