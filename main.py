@@ -22,5 +22,10 @@ async def on_ready():
 async def amogus(ctx):
   await ctx.send(file=discord.File('gus.gif'))
 
+
+
+
+
+
 #keep_alive.keep_alive()
 client.run(my_secret)

@@ -2,27 +2,15 @@ import discord
 from discord.ext import commands
 import youtube_dl
 import urllib.parse, urllib.request, re
-from asyncio import sleep
-from queue import Queue
 
 queues = {}
-queue = Queue()
 
-def check_queue(ctx, id): #проверка есть ли что-то в очереди
+def check_queue(ctx, id):
   vc = ctx.voice_client
-  FFMPEG_OPTIONS = {
-    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn'
-  }
-  YDL_OPTIONS = {'format':"bestaudio"}
-
   if queues[id] != []: # проверяет пустая ли очередь
     url = queues[id].pop(0)
-    with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
-      info = ydl.extract_info(url, download=False)
-      url2 = info['formats'][0]['url']
-      source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS) #был await
-      vc.play(source)
+    print(url)
+    vc.play(url, after = lambda x: check_queue(ctx, id))
 
 class music(commands.Cog):
   def __init__(self, client):
@@ -30,8 +18,8 @@ class music(commands.Cog):
   
   @commands.command()
   async def leave(self, ctx):
-    global queue
-    queue = Queue()
+    server = ctx.message.guild
+    queues[server.id] = []
     await ctx.voice_client.disconnect()
     await ctx.channel.send("I left vc")
   
@@ -64,34 +52,33 @@ class music(commands.Cog):
         'https://www.youtube.com/results?' + query_string
       )
       search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
-      
-      if server.id in queues:
-        queue.put('https://www.youtube.com/watch?v=' + search_results[0])
-        queues[server.id].append(queue.get()) #добавление ссылки в массив очереди
-        print("used 1st if")
-      else:
-        queue.put('https://www.youtube.com/watch?v=' + search_results[0])
-        queues[server.id] = [queue.get()]
-        print("used 2nd if")
 
       FFMPEG_OPTIONS = {
       'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
       'options': '-vn'
       }
       YDL_OPTIONS = {'format':"bestaudio"}
-      url = queues[server.id].pop(0) 
+      url = 'https://www.youtube.com/watch?v=' + search_results[0]
       print(url)
       vc = ctx.voice_client
       with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
         info = ydl.extract_info(url, download=False)
         url2 = info['formats'][0]['url']
         source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
-        vc.play(source, after = lambda x: check_queue(ctx, server.id))
+        
+      if server.id in queues:
+        queues[server.id].append(source) #добавление ссылки в массив очереди
+        print("used 1st if")
+      else:
+        queues[server.id] = [source]
+        print("used 2nd if")
+
+      vc.play(queues[server.id].pop(0), after = lambda x: check_queue(ctx, server.id))
 
     else: #выполняется всегда после первого входа
       server = ctx.message.guild
       voice_channel = ctx.author.voice.channel 
-      vc = ctx.voice_client
+
       query_string = urllib.parse.urlencode({
         'search_query': search
       })
@@ -99,24 +86,28 @@ class music(commands.Cog):
         'https://www.youtube.com/results?' + query_string
       )
       search_results = re.findall(r'/watch\?v=(.{11})', htm_content.read().decode())
-      queue.put('https://www.youtube.com/watch?v=' + search_results[0])
-      queues[server.id].append(queue.get()) #добавление ссылки в массив очереди
 
-      ''' FFMPEG_OPTIONS = {
+      FFMPEG_OPTIONS = {
       'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
       'options': '-vn'
       }
-      YDL_OPTIONS = {'format':"bestaudio"}
-      url = queues[server.id].append()
-      await ctx.send(url) 
-
-      with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
-        info = ydl.extract_info(url, download=False)
-        url2 = info['formats'][0]['url']
-        source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
-        vc.play(source, after = lambda: check_queue(server.id)) '''
-
-  
+      YDL_OPTIONS = {'format':"bestaudio"}  
+      url = 'https://www.youtube.com/watch?v=' + search_results[0]
+      vc = ctx.voice_client
+      
+      if vc.is_playing():
+        with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
+          info = ydl.extract_info(url, download=False)
+          url2 = info['formats'][0]['url']
+          source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
+        queues[server.id].append(source) #добавление ссылки в массив очереди
+      
+      else:
+        with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
+          info = ydl.extract_info(url, download=False)
+          url2 = info['formats'][0]['url']
+          source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
+          vc.play(source, after = lambda x: check_queue(ctx, server.id))
       
 
   @commands.command()
