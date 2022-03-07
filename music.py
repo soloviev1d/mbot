@@ -84,7 +84,13 @@ class music(commands.Cog):
       
       else:
         vc.play(source, after = lambda x: check_queue(ctx, server.id))
-      
+
+  @commands.command()
+  async def skip(self, ctx):
+    server = ctx.message.guild
+    vc = ctx.voice_client  
+    vc.stop()
+    vc.play(queues[server.id].pop(0), after = lambda x: check_queue(ctx, server.id))    
     
 def setup(client):
   client.add_cog(music(client))
