@@ -1,3 +1,6 @@
+#подгружать pip install -U discord.py[voice] в ядро
+#pip install youtube-dl
+#pip install -U ffmpeg
 import os
 import discord
 from discord.ext import commands
