@@ -1,13 +1,11 @@
-#подгружать pip install -U discord.py[voice] в ядро
-#pip install youtube-dl
-#pip install -U ffmpeg
 import os
 import discord
 from discord.ext import commands
 import keep_alive
 import music
+import administrative
 
-cogs = [music]
+cogs = [music, administrative]
 my_secret = os.environ['token']
 client = commands.Bot(command_prefix = '-')
 
@@ -19,7 +17,7 @@ async def on_ready():
   print('Logged in as {0.user}'.format(client))
   print('~~~~~~~~~~~~~~~~~~')
 
-@client.command(pass_context = True)
+@client.command(pass_context = True, description="returns AMOGUS")
 async def amogus(ctx):
   await ctx.send(file=discord.File('gus.gif'))
 
